@@ -1,0 +1,3 @@
+- go:
+  GoTestPrefix: doasp -p p2.s2.m2
+  GoBuildNoOptim: true
