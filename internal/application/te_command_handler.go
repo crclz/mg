@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/google/subcommands"
@@ -34,6 +35,17 @@ func (p *TeCommandHandler) Execute(_ context.Context, f *flag.FlagSet, _ ...inte
 
 	if testName == "" {
 		fmt.Printf("testName is empty\n")
+		return subcommands.ExitFailure
+	}
+
+	if !strings.HasPrefix(testName, "Test") {
+		fmt.Printf("testName should start with Test\n")
+		return subcommands.ExitFailure
+	}
+
+	if !regexp.MustCompile("[_a-zA-Z][_a-zA-Z0-9]{0,100}").MatchString(testName) {
+		fmt.Printf("testName is not a valid identifier\n")
+		return subcommands.ExitFailure
 	}
 
 	// find test according to testName
@@ -53,7 +65,43 @@ func (p *TeCommandHandler) Execute(_ context.Context, f *flag.FlagSet, _ ...inte
 		panic(err)
 	}
 
-	fmt.Printf("goTestSourceFiles: %v", goTestSourceFiles)
+	var testFunctionNamePattern = "func " + testName + "("
+
+	var matchDirs = map[string]struct{}{}
+
+	for _, goTestSourceFile := range goTestSourceFiles {
+		var content, err = os.ReadFile(goTestSourceFile)
+		if err != nil {
+			fmt.Printf("Read %v error: %v", goTestSourceFile, err)
+			continue
+		}
+
+		if !strings.Contains(string(content), testFunctionNamePattern) {
+			continue
+		}
+
+		// match
+
+		var dirRelativePath = "./" + filepath.Dir(goTestSourceFile)
+		dirRelativePath = strings.ReplaceAll(dirRelativePath, "\\", "/")
+
+		matchDirs[dirRelativePath] = struct{}{}
+	}
+
+	if len(matchDirs) != 1 {
+		fmt.Printf("Expecting pattern found 1 packages, actual: %v, pattern: %v\n",
+			len(matchDirs), testFunctionNamePattern)
+		return subcommands.ExitFailure
+	}
+
+	var matchDir string
+
+	for k := range matchDirs {
+		matchDir = k
+		break
+	}
+
+	fmt.Printf("matchDir: %v", matchDir)
 
 	return subcommands.ExitSuccess
 }
