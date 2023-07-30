@@ -1,5 +1,11 @@
 package application_test
 
-func TestAAA_asdasd() {
+import "testing"
 
+func TestAAA_asdasd(t *testing.T) {
+
+}
+
+func TestAAA_fail(t *testing.T) {
+	t.FailNow()
 }

@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -101,7 +102,21 @@ func (p *TeCommandHandler) Execute(_ context.Context, f *flag.FlagSet, _ ...inte
 		break
 	}
 
-	fmt.Printf("matchDir: %v", matchDir)
+	// TODO: prefix
+	// TODO: optim build flags
+	var goTestCommand = []string{"go", "test", "-v", matchDir, "--run", testName}
+
+	fmt.Printf("Test command: %v\n", goTestCommand)
+
+	var commandObject = exec.Command(goTestCommand[0], goTestCommand[1:]...)
+	commandObject.Stdout = os.Stdout
+	commandObject.Stderr = os.Stderr
+
+	err = commandObject.Run()
+	if err != nil {
+		fmt.Printf("go test failure status. error: %v\n", err)
+		return subcommands.ExitFailure
+	}
 
 	return subcommands.ExitSuccess
 }
