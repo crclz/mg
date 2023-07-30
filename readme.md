@@ -16,7 +16,7 @@ mg t TestSomeClass_SomeMethod
 mg t l
 
 # run script
-mg t script TestSomeScript123
+mg t --script TestSomeScript123
 ```
 
 options:
