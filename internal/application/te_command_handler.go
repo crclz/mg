@@ -10,10 +10,21 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/crclz/mg/internal/domain/domainservices"
+	"github.com/crclz/mg/internal/domain/domainutils"
 	"github.com/google/subcommands"
 )
 
 type TeCommandHandler struct {
+	mgContextService *domainservices.MgContextService
+}
+
+func NewTeCommandHandler(
+	mgContextService *domainservices.MgContextService,
+) *TeCommandHandler {
+	return &TeCommandHandler{
+		mgContextService: mgContextService,
+	}
 }
 
 func (*TeCommandHandler) Name() string     { return "t" }
@@ -25,7 +36,7 @@ func (*TeCommandHandler) Usage() string {
 func (p *TeCommandHandler) SetFlags(f *flag.FlagSet) {
 }
 
-func (p *TeCommandHandler) Execute(_ context.Context, f *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
+func (p *TeCommandHandler) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
 	var positionalArgs = f.Args()
 	if len(positionalArgs) != 1 {
 		fmt.Printf("Expecting 1 positional argument, but got %v.\n", len(positionalArgs))
@@ -103,10 +114,37 @@ func (p *TeCommandHandler) Execute(_ context.Context, f *flag.FlagSet, _ ...inte
 	}
 
 	// TODO: prefix
-	// TODO: optim build flags
-	var goTestCommand = []string{"go", "test", "-v", matchDir, "--run", testName}
+	mgContext, err := p.mgContextService.GetUsingMgContext(ctx, ".")
+	if err != nil {
+		fmt.Printf("GetUsingMgContext error: %v\n", err)
+		return subcommands.ExitFailure
+	}
 
-	fmt.Printf("Test command: %v\n", goTestCommand)
+	// TODO: optim build flags
+	var goTestCommand = []string{}
+	goTestCommand = append(goTestCommand, mgContext.Go.GoTestPrefix...)
+	goTestCommand = append(goTestCommand, "go", "test")
+
+	if mgContext.Go.GoBuildNoOptim {
+		goTestCommand = append(goTestCommand, `--gcflags`, `all=-l -N`)
+	}
+
+	goTestCommand = append(goTestCommand, "-v", matchDir, "--run", testName)
+
+	var commandString = ""
+
+	for _, part := range goTestCommand {
+		if strings.Contains(part, " ") {
+			part = "\"" + part + "\""
+		}
+
+		commandString += " " + part
+	}
+
+	commandString = strings.TrimSpace(commandString)
+
+	fmt.Printf("Command array: %v\n", domainutils.ToJson(goTestCommand))
+	fmt.Printf("Command string: %v\n", commandString)
 
 	var commandObject = exec.Command(goTestCommand[0], goTestCommand[1:]...)
 	commandObject.Stdout = os.Stdout
