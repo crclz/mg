@@ -1,12 +1,21 @@
-# cli tool
+# CLI Tool
 
-## changing context
+## Installation
+
 ```bash
-mg context use default
-mg context use other
+go install github.com/crclz/mg@latest
 ```
 
-## testing
+## Context Management
+
+```bash
+mg create-context default # 创建新context，会生成文件: mg-context.default.yaml
+mg get-context # 获取目前使用的context名称
+mg use-context default # 修改目前使用的context
+mg use-context other # 修改目前使用的context
+```
+
+## Testing
 
 ```bash
 # automatically discover test: go test -v ./biz/service --run TestXXX_abcd
@@ -25,7 +34,7 @@ options:
 GoTestPrefix: 
 
 
-## generation
+## Generation
 
 ```bash
 # generate a simple singleton service in biz/service/network_service.go

@@ -37,6 +37,10 @@ func (p *MgContextService) UsingMgContextNameFile() string {
 	return "mg-temp/using-context.txt"
 }
 
+func (p *MgContextService) PatternOfContextName() string {
+	return `^[a-z][a-z0-9-]{0,63}$`
+}
+
 func (p *MgContextService) SetUsingMgContextName(ctx context.Context, dir string, contextName string) error {
 	var usingContextNameFile = filepath.Join(dir, p.UsingMgContextNameFile())
 
@@ -79,16 +83,35 @@ func (p *MgContextService) GetUsingMgContext(
 		return nil, xerrors.Errorf(": %w", err)
 	}
 
-	var yamlFile = fmt.Sprintf("mg-context.%v.yaml", usingContextName)
+	contextConfig, err := p.ReadContextConfigFromDisk(ctx, dir, usingContextName)
+	if err != nil {
+		return nil, xerrors.Errorf(": %w", err)
+	}
+
+	if contextConfig == nil && usingContextName == "default" {
+		contextConfig = domainmodels.NewMgContextConfig()
+	}
+
+	if contextConfig == nil {
+		return nil, xerrors.Errorf("context file not exist: %v", usingContextName)
+	}
+
+	return contextConfig, nil
+}
+
+func (p *MgContextService) ContextConfigFilePath(dir string, contextName string) string {
+	return fmt.Sprintf("mg-context.%v.yaml", contextName)
+}
+
+func (p *MgContextService) ReadContextConfigFromDisk(
+	ctx context.Context, dir string, contextName string,
+) (*domainmodels.MgContextConfig, error) {
+	var yamlFile = p.ContextConfigFilePath(dir, contextName)
+
 	content, err := os.ReadFile(yamlFile)
 	if err != nil {
-		if os.IsNotExist(err) && usingContextName == "default" {
-			return &domainmodels.MgContextConfig{
-				Go: &domainmodels.MgContextConfigGoConfig{
-					GoTestPrefix:   []string{},
-					GoBuildNoOptim: false,
-				},
-			}, nil
+		if os.IsNotExist(err) {
+			return nil, nil
 		}
 		return nil, xerrors.Errorf(": %w", err)
 	}
@@ -100,4 +123,26 @@ func (p *MgContextService) GetUsingMgContext(
 	}
 
 	return result, nil
+}
+
+func (p *MgContextService) WriteContextConfigToDisk(
+	ctx context.Context, dir string, contextName string, contextConfig *domainmodels.MgContextConfig,
+) error {
+	if contextConfig == nil {
+		panic("contextConfig is nil")
+	}
+
+	var yamlFile = p.ContextConfigFilePath(dir, contextName)
+
+	yamlBytes, err := yaml.Marshal(contextConfig)
+	if err != nil {
+		return xerrors.Errorf(": %w", err)
+	}
+
+	err = os.WriteFile(yamlFile, yamlBytes, 0644)
+	if err != nil {
+		return xerrors.Errorf(": %w", err)
+	}
+
+	return nil
 }

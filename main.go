@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/crclz/mg/internal/application"
+	"github.com/crclz/mg/internal/domain/domainservices"
 	"github.com/google/subcommands"
 )
 
@@ -13,7 +14,10 @@ func main() {
 	subcommands.Register(subcommands.HelpCommand(), "")
 	subcommands.Register(subcommands.FlagsCommand(), "")
 	subcommands.Register(subcommands.CommandsCommand(), "")
-	subcommands.Register(&application.TeCommandHandler{}, "")
+
+	subcommands.Register(application.NewTeCommandHandler(domainservices.GetSingletonMgContextService()), "Testing")
+
+	subcommands.Register(application.NewCreateContextCommandHandler(domainservices.GetSingletonMgContextService()), "Context Management")
 
 	flag.Parse()
 	ctx := context.Background()
