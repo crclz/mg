@@ -15,28 +15,28 @@ import (
 	"github.com/google/subcommands"
 )
 
-type TeCommandHandler struct {
+type TeCommand struct {
 	mgContextService *domainservices.MgContextService
 }
 
-func NewTeCommandHandler(
+func NewTeCommand(
 	mgContextService *domainservices.MgContextService,
-) *TeCommandHandler {
-	return &TeCommandHandler{
+) *TeCommand {
+	return &TeCommand{
 		mgContextService: mgContextService,
 	}
 }
 
-func (*TeCommandHandler) Name() string     { return "t" }
-func (*TeCommandHandler) Synopsis() string { return "Run tests with convenience" }
-func (*TeCommandHandler) Usage() string {
+func (*TeCommand) Name() string     { return "t" }
+func (*TeCommand) Synopsis() string { return "Run tests with convenience" }
+func (*TeCommand) Usage() string {
 	return "refer to readme.md"
 }
 
-func (p *TeCommandHandler) SetFlags(f *flag.FlagSet) {
+func (p *TeCommand) SetFlags(f *flag.FlagSet) {
 }
 
-func (p *TeCommandHandler) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
+func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
 	var positionalArgs = f.Args()
 	if len(positionalArgs) != 1 {
 		fmt.Printf("Expecting 1 positional argument, but got %v.\n", len(positionalArgs))

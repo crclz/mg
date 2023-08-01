@@ -11,28 +11,28 @@ import (
 	"github.com/google/subcommands"
 )
 
-type CreateContextCommandHandler struct {
+type CreateContextCommand struct {
 	mgContextService *domainservices.MgContextService
 }
 
-func NewCreateContextCommandHandler(
+func NewCreateContextCommand(
 	mgContextService *domainservices.MgContextService,
-) *CreateContextCommandHandler {
-	return &CreateContextCommandHandler{
+) *CreateContextCommand {
+	return &CreateContextCommand{
 		mgContextService: mgContextService,
 	}
 }
 
-func (*CreateContextCommandHandler) Name() string     { return "create-context" }
-func (*CreateContextCommandHandler) Synopsis() string { return "create mg context" }
-func (*CreateContextCommandHandler) Usage() string {
+func (*CreateContextCommand) Name() string     { return "create-context" }
+func (*CreateContextCommand) Synopsis() string { return "create mg context" }
+func (*CreateContextCommand) Usage() string {
 	return "create-context $contextName"
 }
 
-func (p *CreateContextCommandHandler) SetFlags(f *flag.FlagSet) {
+func (p *CreateContextCommand) SetFlags(f *flag.FlagSet) {
 }
 
-func (p *CreateContextCommandHandler) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
+func (p *CreateContextCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
 	var positionalArgs = f.Args()
 	if len(positionalArgs) >= 2 {
 		fmt.Printf("Expecting 0/1 positional argument, but got %v.\n", len(positionalArgs))

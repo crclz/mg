@@ -15,9 +15,9 @@ func main() {
 	subcommands.Register(subcommands.FlagsCommand(), "")
 	subcommands.Register(subcommands.CommandsCommand(), "")
 
-	subcommands.Register(application.NewTeCommandHandler(domainservices.GetSingletonMgContextService()), "Testing")
+	subcommands.Register(application.NewTeCommand(domainservices.GetSingletonMgContextService()), "Testing")
 
-	subcommands.Register(application.NewCreateContextCommandHandler(domainservices.GetSingletonMgContextService()), "Context Management")
+	subcommands.Register(application.NewCreateContextCommand(domainservices.GetSingletonMgContextService()), "Context Management")
 
 	flag.Parse()
 	ctx := context.Background()
