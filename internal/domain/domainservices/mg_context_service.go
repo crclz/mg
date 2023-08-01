@@ -34,7 +34,7 @@ func initSingletonMgContextService() *MgContextService {
 // methods
 
 func (p *MgContextService) UsingMgContextNameFile() string {
-	return "mg-temp/using-context.txt"
+	return "mg-temp/using-context"
 }
 
 func (p *MgContextService) PatternOfContextName() string {
@@ -44,7 +44,7 @@ func (p *MgContextService) PatternOfContextName() string {
 func (p *MgContextService) SetUsingMgContextName(ctx context.Context, dir string, contextName string) error {
 	var usingContextNameFile = filepath.Join(dir, p.UsingMgContextNameFile())
 
-	var err = os.MkdirAll(filepath.Dir(usingContextNameFile), 0644)
+	var err = os.MkdirAll(filepath.Dir(usingContextNameFile), 0700)
 	if err != nil {
 		return xerrors.Errorf(": %w", err)
 	}
