@@ -17,6 +17,9 @@ import (
 
 type TeCommand struct {
 	mgContextService *domainservices.MgContextService
+
+	// flags
+	script bool
 }
 
 func NewTeCommand(
@@ -34,6 +37,7 @@ func (*TeCommand) Usage() string {
 }
 
 func (p *TeCommand) SetFlags(f *flag.FlagSet) {
+	f.BoolVar(&p.script, "script", false, "Will set environment variable $GoScriptName")
 }
 
 func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
@@ -129,7 +133,7 @@ func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface
 		goTestCommand = append(goTestCommand, `--gcflags`, `all=-l -N`)
 	}
 
-	goTestCommand = append(goTestCommand, "-v", matchDir, "--run", testName)
+	goTestCommand = append(goTestCommand, "-v", matchDir, "--run", "^"+testName+"$")
 
 	var commandString = ""
 
@@ -149,6 +153,10 @@ func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface
 	var commandObject = exec.Command(goTestCommand[0], goTestCommand[1:]...)
 	commandObject.Stdout = os.Stdout
 	commandObject.Stderr = os.Stderr
+
+	if p.script {
+		commandObject.Env = append(os.Environ(), "GoScriptName="+testName)
+	}
 
 	err = commandObject.Run()
 	if err != nil {

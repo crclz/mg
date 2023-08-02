@@ -10,7 +10,11 @@ go install github.com/crclz/mg@latest
 
 ```bash
 mg create-context default # 创建新context，会生成文件: mg-context.default.yaml
+
+# TODO: mg create-context --preset byted # 创建context，附带doas -p XXX，并且禁止编译优化
+
 mg use-context --query # 获取目前使用的context名称
+
 mg use-context default # 修改目前使用的context
 mg use-context other # 修改目前使用的context
 ```
