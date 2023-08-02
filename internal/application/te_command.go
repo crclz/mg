@@ -19,7 +19,8 @@ type TeCommand struct {
 	mgContextService *domainservices.MgContextService
 
 	// flags
-	script bool
+	script   bool
+	countOne bool
 }
 
 func NewTeCommand(
@@ -38,6 +39,7 @@ func (*TeCommand) Usage() string {
 
 func (p *TeCommand) SetFlags(f *flag.FlagSet) {
 	f.BoolVar(&p.script, "script", false, "Will set environment variable $GoScriptName")
+	f.BoolVar(&p.countOne, "c1", false, "will add --count=1 to go test command")
 }
 
 func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
@@ -134,6 +136,10 @@ func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface
 	}
 
 	goTestCommand = append(goTestCommand, "-v", matchDir, "--run", "^"+testName+"$")
+
+	if p.countOne {
+		goTestCommand = append(goTestCommand, "--count=1")
+	}
 
 	var commandString = ""
 

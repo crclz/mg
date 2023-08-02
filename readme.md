@@ -4,6 +4,11 @@
 
 ```bash
 go install github.com/crclz/mg@latest
+
+# or:
+
+# 注意字节内部的goproxy在代理github时不会很及时，所以需要临时采用其他的goproxy.
+GOPROXY=https://goproxy.cn go install github.com/crclz/mg@latest
 ```
 
 ## Context Management
@@ -35,7 +40,8 @@ mg t --script TestSomeScript123
 options:
 - `--c1`: add --count=1 to argument
 
-GoTestPrefix: 
+context configs:
+- GoTestPrefix: will prepend this prefix to go test command. e.g. `[doas, -p, p.s.m]`
 
 
 ## Generation
