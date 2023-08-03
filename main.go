@@ -20,6 +20,9 @@ func main() {
 	subcommands.Register(application.NewCreateContextCommand(domainservices.GetSingletonMgContextService()), "Context Management")
 	subcommands.Register(application.NewUseContextCommand(domainservices.GetSingletonMgContextService()), "Context Management")
 
+	// generate
+	subcommands.Register(application.NewGenerateCommand(domainservices.GetSingletonMgContextService()), "Code Generation")
+
 	flag.Parse()
 	ctx := context.Background()
 	os.Exit(int(subcommands.Execute(ctx)))

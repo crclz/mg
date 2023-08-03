@@ -1,0 +1,31 @@
+{{define "SimpleSingletonService"}}
+
+package {{.PackageName}}
+
+type {{.ServiceClassName}} struct {
+}
+
+// Constructor of {{.ServiceClassName}}
+func New{{.ServiceClassName}}() *{{.ServiceClassName}} {
+	return &{{.ServiceClassName}}{}
+}
+
+// wire
+
+var singleton{{.ServiceClassName}} *{{.ServiceClassName}} = initSingleton{{.ServiceClassName}}()
+
+func GetSingleton{{.ServiceClassName}}() *{{.ServiceClassName}} {
+	return singleton{{.ServiceClassName}}
+}
+
+func initSingleton{{.ServiceClassName}}() *{{.ServiceClassName}} {
+	return New{{.ServiceClassName}}()
+}
+
+// methods
+
+func (p *{{.ServiceClassName}}) Hello() {
+}
+
+
+{{end}}
