@@ -2,6 +2,8 @@
 
 package {{.PackageName}}
 
+import "context"
+
 type {{.ServiceClassName}} struct {
 }
 
@@ -24,7 +26,8 @@ func initSingleton{{.ServiceClassName}}() *{{.ServiceClassName}} {
 
 // methods
 
-func (p *{{.ServiceClassName}}) Hello() {
+func (p *{{.ServiceClassName}}) Hello(ctx context.Context, name string) error {
+	return nil
 }
 
 

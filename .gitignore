@@ -1,6 +1,8 @@
 # mg cli tool ignore
-
 /mg-temp
+
+# mg develop
+/mg_codegen_testing
 
 
 # golang ignore
