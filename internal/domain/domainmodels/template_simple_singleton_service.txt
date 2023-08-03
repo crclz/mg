@@ -2,7 +2,13 @@
 
 package {{.PackageName}}
 
-import "context"
+import (
+	"context"
+	"strings"
+
+	"github.com/bytedance/sonic"
+	"golang.org/x/xerrors"
+)
 
 type {{.ServiceClassName}} struct {
 }
@@ -26,8 +32,26 @@ func initSingleton{{.ServiceClassName}}() *{{.ServiceClassName}} {
 
 // methods
 
-func (p *{{.ServiceClassName}}) Hello(ctx context.Context, name string) error {
-	return nil
+func (p *{{.ServiceClassName}}) HelloWorlds(ctx context.Context, worldsJson string) (string, error) {
+	var worlds []string
+
+	var err = sonic.UnmarshalString(worldsJson, &worlds)
+	if err != nil {
+		return "", xerrors.Errorf("Json unmarshal error: %w", err)
+	}
+
+	var message = strings.Builder{}
+
+	_, err = message.WriteString("Hello: ")
+	if err != nil {
+		return "", xerrors.Errorf(": %w", err)
+	}
+
+	for _, world := range worlds {
+		message.WriteString(world + ", ")
+	}
+
+	return strings.TrimSpace(message.String()) + "!", nil
 }
 
 
