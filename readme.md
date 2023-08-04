@@ -50,6 +50,10 @@ context configs:
 # generate a simple singleton service in biz/service/network_service.go
 mg g s biz/service/network_service
 
+# generate test
+# TestSomeClass_SomeMethod_whenProvideNilInput_thenReturnError
+mg g t SomeClass.SomeMethod when provide nil input then return error
+
 # generate a normal singleton service
 mg g s --singleton --wire biz/dependency_building biz/service/NetworkService
 

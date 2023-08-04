@@ -1,0 +1,37 @@
+{{ define testing }}
+
+{{ if .NeedHeader }}
+package {{.PackageName}}_test
+
+import (
+	"context"
+	"testing"
+
+	"github.com/crclz/mg/internal/domain/domainservices"
+	"github.com/stretchr/testify/require"
+)
+
+{{ end }}
+
+{{ if .ClassName }}
+
+func Test{{.ClassName}}{{MethodName}}_{{.Behavior}}(t* testing.T) {
+	var assert = require.New(t) // TODO: replace with env check
+
+	// arrange
+	var ctx = context.TODO() // TODO: replace with wire
+	var {{ClassInstanceName}} = {{.PackageName}}.GetSingleton{{.ClassName}}()
+
+	// act
+
+	// assert
+}
+
+
+package domainservices_test
+
+
+
+
+
+{{ end }}
