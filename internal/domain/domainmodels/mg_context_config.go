@@ -16,12 +16,12 @@ func NewMgContextConfig() *MgContextConfig {
 }
 
 type MgContextConfigHelp struct {
-	GoInstallCommand string `yaml:"GoInstallCommand"`
+	MgOfficial string `yaml:"MgOfficial"`
 }
 
 func NewMgContextConfigHelp() *MgContextConfigHelp {
 	return &MgContextConfigHelp{
-		GoInstallCommand: "go install github.com/crclz/mg@latest",
+		MgOfficial: "https://github.com/crclz/mg",
 	}
 }
 
