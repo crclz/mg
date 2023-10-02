@@ -1,5 +1,6 @@
 # mg cli tool ignore
 /mg-temp
+*.tmp.*
 
 # mg develop
 /mg_codegen_testing
