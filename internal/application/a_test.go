@@ -40,7 +40,7 @@ func TestAAA_LongRunning(t *testing.T) {
 	var eg = errgroup.Group{}
 	eg.SetLimit(2)
 
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 6; i++ {
 		eg.Go(func() error {
 			time.Sleep(time.Second * 1)
 			return nil

@@ -171,7 +171,7 @@ func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface
 	var commandObject = exec.CommandContext(ctx, goTestCommand[0], goTestCommand[1:]...)
 	commandObject.Stdout = os.Stdout
 	commandObject.Stderr = os.Stderr
-	commandObject.SysProcAttr = &syscall.SysProcAttr{Setpgid: true, Pgid: 0}
+	commandObject.SysProcAttr = p.SysProcAttr()
 
 	if p.script {
 		commandObject.Env = append(os.Environ(), "GoScriptName="+testName)
@@ -180,18 +180,9 @@ func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface
 	defer func() {
 
 		if !commandObject.ProcessState.Exited() {
-			var pgid = -1 * commandObject.Process.Pid
 
-			// https://medium.com/@felixge/killing-a-child-process-and-all-of-its-children-in-go-54079af94773
-			// Solution: In addition to sending a signal to a single PID,
-			// kill(2) also supports sending a signal to a Process Group by passing
-			// the process group id (PGID) as a negative number.
-			var err = syscall.Kill(pgid, syscall.SIGKILL)
-			if err != nil {
-				fmt.Printf("Kill pgid %v error: %+v\n", pgid, err)
-			} else {
-				fmt.Printf("Kill pgid %v success\n", pgid)
-			}
+			p.TryCascadeKill(commandObject.Process)
+
 		}
 	}()
 
