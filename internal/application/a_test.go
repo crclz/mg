@@ -24,12 +24,16 @@ func TestAAA_script_safe(t *testing.T) {
 	t.Logf("GoScriptName: %v", os.Getenv("GoScriptName"))
 }
 
+/*
+1. run command: go run . t -c1 TestAAA_LongRunning
+2. wait less than 5 seconds, and press ctrl-c
+3. run command: cat internal/application/long-running.tmp.txt
+4. if file not exist, then long running test is successfully killed
+*/
 func TestAAA_LongRunning(t *testing.T) {
 	var assert = require.New(t)
 	var outputFile = "long-running.tmp.txt"
 
-	// go run . t -c1 TestAAA_LongRunning
-	// cat internal/application/long-running.tmp.txt
 	signal.Ignore(syscall.SIGINT)
 
 	var err = os.RemoveAll(outputFile)
@@ -40,7 +44,7 @@ func TestAAA_LongRunning(t *testing.T) {
 	var eg = errgroup.Group{}
 	eg.SetLimit(2)
 
-	for i := 0; i < 6; i++ {
+	for i := 0; i < 10; i++ {
 		eg.Go(func() error {
 			time.Sleep(time.Second * 1)
 			return nil
