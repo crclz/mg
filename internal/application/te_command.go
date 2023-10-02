@@ -6,13 +6,16 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"syscall"
 
 	"github.com/crclz/mg/internal/domain/domainservices"
 	"github.com/crclz/mg/internal/domain/domainutils"
 	"github.com/google/subcommands"
+	"golang.org/x/xerrors"
 )
 
 type TeCommand struct {
@@ -43,6 +46,15 @@ func (p *TeCommand) SetFlags(f *flag.FlagSet) {
 }
 
 func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
+	ctx, cancelCause := context.WithCancelCause(ctx)
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		var sig = <-sigChan
+		cancelCause(xerrors.Errorf("Received signal: %v", sig))
+	}()
+
 	var positionalArgs = f.Args()
 	if len(positionalArgs) != 1 {
 		fmt.Printf("Expecting 1 positional argument, but got %v.\n", len(positionalArgs))
@@ -156,13 +168,32 @@ func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface
 	fmt.Printf("Command array: %v\n", domainutils.ToJson(goTestCommand))
 	fmt.Printf("Command string: %v\n", commandString)
 
-	var commandObject = exec.Command(goTestCommand[0], goTestCommand[1:]...)
+	var commandObject = exec.CommandContext(ctx, goTestCommand[0], goTestCommand[1:]...)
 	commandObject.Stdout = os.Stdout
 	commandObject.Stderr = os.Stderr
+	commandObject.SysProcAttr = &syscall.SysProcAttr{Setpgid: true, Pgid: 0}
 
 	if p.script {
 		commandObject.Env = append(os.Environ(), "GoScriptName="+testName)
 	}
+
+	defer func() {
+
+		if !commandObject.ProcessState.Exited() {
+			var pgid = -1 * commandObject.Process.Pid
+
+			// https://medium.com/@felixge/killing-a-child-process-and-all-of-its-children-in-go-54079af94773
+			// Solution: In addition to sending a signal to a single PID,
+			// kill(2) also supports sending a signal to a Process Group by passing
+			// the process group id (PGID) as a negative number.
+			var err = syscall.Kill(pgid, syscall.SIGKILL)
+			if err != nil {
+				fmt.Printf("Kill pgid %v error: %+v\n", pgid, err)
+			} else {
+				fmt.Printf("Kill pgid %v success\n", pgid)
+			}
+		}
+	}()
 
 	err = commandObject.Run()
 	if err != nil {

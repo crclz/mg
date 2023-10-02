@@ -29,7 +29,7 @@ func TestAAA_LongRunning(t *testing.T) {
 	var outputFile = "long-running.tmp.txt"
 
 	// go run . t -c1 TestAAA_LongRunning
-	// 然后ctrl+c，不会打断测试用例，long-running.tmp.txt还是会输出 >5000
+	// cat internal/application/long-running.tmp.txt
 	signal.Ignore(syscall.SIGINT)
 
 	var err = os.RemoveAll(outputFile)
@@ -51,7 +51,8 @@ func TestAAA_LongRunning(t *testing.T) {
 
 	var testRunningMilliseconds = int64(time.Since(t0).Milliseconds())
 
-	var outputContent = fmt.Sprintf("%v", testRunningMilliseconds)
+	var outputContent = fmt.Sprintf("pid=%v sid=%v time=%v",
+		os.Getpid(), os.Getppid(), testRunningMilliseconds)
 
 	err = os.WriteFile(outputFile, []byte(outputContent), 0644)
 	assert.NoError(err)
