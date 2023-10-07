@@ -11,7 +11,33 @@ go install github.com/crclz/mg@latest
 GOPROXY=https://goproxy.cn go install github.com/crclz/mg@latest
 ```
 
+## Running Tests (Basic)
+```bash
+# 自己敲命令: 需指定包名称
+go test -v ./biz/utils --run ^TestAbcd$
+
+# mg: 只需指定方法名称
+mg t TestAbcd
+```
+
+## Code Generation
+
+```bash
+# generate a simple singleton service in biz/service/network_service.go
+mg g s biz/service/network_service
+
+# TODO: generate test (This feature is not implemented yet!)
+# TestSomeClass_SomeMethod_when_provide_nil_input_then_return_error
+mg g t SomeClass.SomeMethod when provide nil input then return error
+mg g t [*]SomeClass[)] SomeMethod when provide nil input then return error
+```
+
 ## Context Management
+
+mg-context是自定义的配置文件。
+
+例如，如果想要在 `go test` 之前加一些命令前缀，例如用于鉴权的 `doas -p p.s.m go test XXXX`，可以在mg-context配置文件里面修改GoTestPrefix字段。
+
 
 ```bash
 mg create-context default # 创建新context，会生成文件: mg-context.default.yaml
@@ -22,33 +48,17 @@ mg use-context default # 修改目前使用的context
 mg use-context other # 修改目前使用的context
 ```
 
-## Testing
+示例:
 
-```bash
-# automatically discover test: go test -v ./biz/service --run TestXXX_abcd
-mg t TestSomeClass_SomeMethod
-
-# run script
-# TODO: script safe assert
-# TODO: long running tests
-mg t --script TestSomeScript123
 ```
+Go:
+    GoTestPrefix: ["doasp", "-p", "p2.s2.m2"] # go test 前缀命令
+    GoBuildNoOptim: true # 禁止编译优化，在测试中使用mockey时常常需要打开此开关
+```
+
+
+## Running Tests (Advanced)
 
 options:
 - `--c1`: add --count=1 to argument
-
-context configs:
-- GoTestPrefix: will prepend this prefix to go test command. e.g. `[doas, -p, p.s.m]`
-
-
-## Generation
-
-```bash
-# generate a simple singleton service in biz/service/network_service.go
-mg g s biz/service/network_service
-
-# generate test
-# TestSomeClass_SomeMethod_whenProvideNilInput_thenReturnError
-mg g t SomeClass.SomeMethod when provide nil input then return error
-mg g t [*]ExampleService[)] SomeMethod when provide nil input then return error
-```
+- `--script $GoScriptName`: add GoScriptName as environment variable, see mgtesting/
