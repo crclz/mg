@@ -6,6 +6,7 @@ require (
 	github.com/bytedance/sonic v1.9.2
 	github.com/google/subcommands v1.2.0
 	github.com/stretchr/testify v1.8.4
+	go.uber.org/multierr v1.11.0
 	golang.org/x/sync v0.3.0
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
 	gopkg.in/yaml.v3 v3.0.1
