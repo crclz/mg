@@ -56,9 +56,19 @@ Go:
     GoBuildNoOptim: true # 禁止编译优化，在测试中使用mockey时常常需要打开此开关
 ```
 
+## Running Tests with Mesh
+
+有时下游会开启严格鉴权，此时开发调试时需要套一层mesh。
+
+1. 将 [go_test_with_mesh.sample.sh](./internal/application/go_test_with_mesh.sample.sh) 复制到仓库，重命名为 `go_test_with_mesh.sh`
+    - 修改sh脚本中的 ServicePsm
+    - 根据仓库的需要，做其他定制化的修改
+2. 修改 mg-context.*.yaml, 在 `Go` 字段下，添加 `MeshTestCommand: ["bash", "go_test_with_mesh.sh"]`
+3. 运行测试时添加 `--mesh` 参数，例如: `mg t --mesh TestXXXX`
 
 ## Running Tests (Advanced)
 
 options:
 - `--c1`: add --count=1 to argument
+- `--dry-run`: only print command, not run test
 - `--script $GoScriptName`: add GoScriptName as environment variable, see mgtesting/
