@@ -24,6 +24,7 @@ type TeCommand struct {
 	// flags
 	script   bool
 	countOne bool
+	meshTest bool
 }
 
 func NewTeCommand(
@@ -43,6 +44,7 @@ func (*TeCommand) Usage() string {
 func (p *TeCommand) SetFlags(f *flag.FlagSet) {
 	f.BoolVar(&p.script, "script", false, "Will set environment variable $GoScriptName")
 	f.BoolVar(&p.countOne, "c1", false, "will add --count=1 to go test command")
+	f.BoolVar(&p.meshTest, "mesh", false, "test with mesh")
 }
 
 func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
@@ -138,44 +140,67 @@ func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface
 		return subcommands.ExitFailure
 	}
 
-	// TODO: optim build flags
 	var goTestCommand = []string{}
-	goTestCommand = append(goTestCommand, mgContext.Go.GoTestPrefix...)
-	goTestCommand = append(goTestCommand, "go", "test")
+	var environmentalVariableMap = map[string]string{}
 
-	if mgContext.Go.GoBuildNoOptim {
-		goTestCommand = append(goTestCommand, `--gcflags`, `all=-l -N`)
-	}
+	if !p.meshTest {
+		goTestCommand = append(goTestCommand, mgContext.Go.GoTestPrefix...)
+		goTestCommand = append(goTestCommand, "go", "test")
 
-	goTestCommand = append(goTestCommand, "-v", matchDir, "--run", "^"+testName+"$")
-
-	if p.countOne {
-		goTestCommand = append(goTestCommand, "--count=1")
-	}
-
-	var commandString = ""
-
-	for _, part := range goTestCommand {
-		if strings.Contains(part, " ") {
-			part = "\"" + part + "\""
+		if mgContext.Go.GoBuildNoOptim {
+			goTestCommand = append(goTestCommand, `--gcflags`, `all=-l -N`)
 		}
 
-		commandString += " " + part
+		goTestCommand = append(goTestCommand, "-v", matchDir, "--run", "^"+testName+"$")
+
+		if p.countOne {
+			goTestCommand = append(goTestCommand, "--count=1")
+		}
+
+		var commandString = ""
+
+		for _, part := range goTestCommand {
+			if strings.Contains(part, " ") {
+				part = "\"" + part + "\""
+			}
+
+			commandString += " " + part
+		}
+
+		commandString = strings.TrimSpace(commandString)
+
+		fmt.Printf("Command array: %v\n", domainutils.ToJson(goTestCommand))
+		fmt.Printf("Command string: %v\n", commandString)
+	} else {
+		// mesh
+		if len(mgContext.Go.MeshTestCommand) == 0 {
+			fmt.Printf("mgContext.Go.MeshTestCommand is empty")
+			return subcommands.ExitFailure
+		}
+
+		goTestCommand = append(goTestCommand, mgContext.Go.MeshTestCommand...)
+
+		environmentalVariableMap["CompilePackage"] = matchDir
+		environmentalVariableMap["TestRunPattern"] = testName
 	}
 
-	commandString = strings.TrimSpace(commandString)
-
-	fmt.Printf("Command array: %v\n", domainutils.ToJson(goTestCommand))
-	fmt.Printf("Command string: %v\n", commandString)
+	if p.script {
+		environmentalVariableMap["GoScriptName"] = testName
+	}
+	// commandObject.Env = append(os.Environ(), "GoScriptName="+testName)
 
 	var commandObject = exec.CommandContext(ctx, goTestCommand[0], goTestCommand[1:]...)
 	commandObject.Stdout = os.Stdout
 	commandObject.Stderr = os.Stderr
 	commandObject.SysProcAttr = p.SysProcAttr()
 
-	if p.script {
-		commandObject.Env = append(os.Environ(), "GoScriptName="+testName)
+	var environ = commandObject.Environ()
+
+	for name, value := range environmentalVariableMap {
+		environ = append(environ, fmt.Sprintf("%v=%v", name, value))
 	}
+
+	commandObject.Env = environ
 
 	defer func() {
 

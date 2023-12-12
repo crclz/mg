@@ -21,11 +21,12 @@ type MgContextConfigHelp struct {
 
 func NewMgContextConfigHelp() *MgContextConfigHelp {
 	return &MgContextConfigHelp{
-		MgOfficial: "https://github.com/crclz/mg",
+		MgOfficial: "The official page is: https://github.com/crclz/mg",
 	}
 }
 
 type MgContextConfigGoConfig struct {
-	GoTestPrefix   []string `yaml:"GoTestPrefix"`
-	GoBuildNoOptim bool     `yaml:"GoBuildNoOptim"`
+	GoTestPrefix    []string `yaml:"GoTestPrefix"`
+	GoBuildNoOptim  bool     `yaml:"GoBuildNoOptim"`
+	MeshTestCommand []string `yaml:"MeshTestCommand"`
 }

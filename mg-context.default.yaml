@@ -1,3 +1,4 @@
 Go:
   GoTestPrefix: []
   GoBuildNoOptim: true
+  MeshTestCommand: ["bash", "mesh_test_dummy.sh"]
