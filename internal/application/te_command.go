@@ -175,21 +175,10 @@ func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface
 	if p.script {
 		environmentalVariableMap["GoScriptName"] = testName
 	}
-	// commandObject.Env = append(os.Environ(), "GoScriptName="+testName)
 
 	{
 		// print command
-		var commandString = ""
-
-		for _, part := range command {
-			if strings.Contains(part, " ") {
-				part = "\"" + part + "\""
-			}
-
-			commandString += " " + part
-		}
-
-		commandString = strings.TrimSpace(commandString)
+		var commandString = p.FormatCommandString(command)
 
 		fmt.Printf("Command array: %v\n", domainutils.ToJson(command))
 		fmt.Printf("Command string: %v\n", commandString)
@@ -233,4 +222,20 @@ func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface
 	}
 
 	return subcommands.ExitSuccess
+}
+
+func (p *TeCommand) FormatCommandString(command []string) string {
+	var commandString = ""
+
+	for _, part := range command {
+		if strings.Contains(part, " ") {
+			part = "\"" + part + "\""
+		}
+
+		commandString += " " + part
+	}
+
+	commandString = strings.TrimSpace(commandString)
+
+	return commandString
 }
