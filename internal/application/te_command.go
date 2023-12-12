@@ -106,7 +106,7 @@ func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface
 	for _, goTestSourceFile := range goTestSourceFiles {
 		var content, err = os.ReadFile(goTestSourceFile)
 		if err != nil {
-			fmt.Printf("Read %v error: %v", goTestSourceFile, err)
+			fmt.Printf("Read %v error: %v\n", goTestSourceFile, err)
 			continue
 		}
 
@@ -162,7 +162,7 @@ func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface
 	} else {
 		// mesh
 		if len(mgContext.Go.MeshTestCommand) == 0 {
-			fmt.Printf("mgContext.Go.MeshTestCommand is empty")
+			fmt.Printf("mgContext.Go.MeshTestCommand is empty\n")
 			return subcommands.ExitFailure
 		}
 
@@ -170,6 +170,7 @@ func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface
 
 		environmentalVariableMap["CompilePackage"] = matchDir
 		environmentalVariableMap["TestRunPattern"] = testName
+		environmentalVariableMap["DockerDisableInteractive"] = "1"
 	}
 
 	if p.script {
