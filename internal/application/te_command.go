@@ -142,21 +142,21 @@ func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface
 		return subcommands.ExitFailure
 	}
 
-	var goTestCommand = []string{}
+	var command = []string{}
 	var environmentalVariableMap = map[string]string{}
 
 	if !p.meshTest {
-		goTestCommand = append(goTestCommand, mgContext.Go.GoTestPrefix...)
-		goTestCommand = append(goTestCommand, "go", "test")
+		command = append(command, mgContext.Go.GoTestPrefix...)
+		command = append(command, "go", "test")
 
 		if mgContext.Go.GoBuildNoOptim {
-			goTestCommand = append(goTestCommand, `--gcflags`, `all=-l -N`)
+			command = append(command, `--gcflags`, `all=-l -N`)
 		}
 
-		goTestCommand = append(goTestCommand, "-v", matchDir, "--run", "^"+testName+"$")
+		command = append(command, "-v", matchDir, "--run", "^"+testName+"$")
 
 		if p.countOne {
-			goTestCommand = append(goTestCommand, "--count=1")
+			command = append(command, "--count=1")
 		}
 
 	} else {
@@ -166,7 +166,7 @@ func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface
 			return subcommands.ExitFailure
 		}
 
-		goTestCommand = append(goTestCommand, mgContext.Go.MeshTestCommand...)
+		command = append(command, mgContext.Go.MeshTestCommand...)
 
 		environmentalVariableMap["CompilePackage"] = matchDir
 		environmentalVariableMap["TestRunPattern"] = testName
@@ -181,7 +181,7 @@ func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface
 		// print command
 		var commandString = ""
 
-		for _, part := range goTestCommand {
+		for _, part := range command {
 			if strings.Contains(part, " ") {
 				part = "\"" + part + "\""
 			}
@@ -191,7 +191,7 @@ func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface
 
 		commandString = strings.TrimSpace(commandString)
 
-		fmt.Printf("Command array: %v\n", domainutils.ToJson(goTestCommand))
+		fmt.Printf("Command array: %v\n", domainutils.ToJson(command))
 		fmt.Printf("Command string: %v\n", commandString)
 
 		fmt.Printf("EnvironmentalVariableMap: %v\n", domainutils.ToJson(environmentalVariableMap))
@@ -204,7 +204,7 @@ func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface
 		fmt.Printf("Start running...\n")
 	}
 
-	var commandObject = exec.CommandContext(ctx, goTestCommand[0], goTestCommand[1:]...)
+	var commandObject = exec.CommandContext(ctx, command[0], command[1:]...)
 	commandObject.Stdout = os.Stdout
 	commandObject.Stderr = os.Stderr
 	commandObject.SysProcAttr = p.SysProcAttr()
