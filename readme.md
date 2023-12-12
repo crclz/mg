@@ -58,7 +58,7 @@ Go:
 
 ## Running Tests with Mesh
 
-有时下游会开启严格鉴权，此时开发调试时需要套一层mesh。
+有时下游会开启~~严格鉴权~~服务鉴定，此时开发调试时需要套一层mesh。
 
 1. 将 [go_test_with_mesh.sample.sh](./internal/application/go_test_with_mesh.sample.sh) 复制到仓库，重命名为 `go_test_with_mesh.sh`
     - 修改sh脚本中的 ServicePsm
