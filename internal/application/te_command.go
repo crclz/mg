@@ -25,6 +25,7 @@ type TeCommand struct {
 	script   bool
 	countOne bool
 	meshTest bool
+	dryRun   bool
 }
 
 func NewTeCommand(
@@ -45,6 +46,7 @@ func (p *TeCommand) SetFlags(f *flag.FlagSet) {
 	f.BoolVar(&p.script, "script", false, "Will set environment variable $GoScriptName")
 	f.BoolVar(&p.countOne, "c1", false, "will add --count=1 to go test command")
 	f.BoolVar(&p.meshTest, "mesh", false, "test with mesh")
+	f.BoolVar(&p.dryRun, "dry-run", false, "dry run")
 }
 
 func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
@@ -157,20 +159,6 @@ func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface
 			goTestCommand = append(goTestCommand, "--count=1")
 		}
 
-		var commandString = ""
-
-		for _, part := range goTestCommand {
-			if strings.Contains(part, " ") {
-				part = "\"" + part + "\""
-			}
-
-			commandString += " " + part
-		}
-
-		commandString = strings.TrimSpace(commandString)
-
-		fmt.Printf("Command array: %v\n", domainutils.ToJson(goTestCommand))
-		fmt.Printf("Command string: %v\n", commandString)
 	} else {
 		// mesh
 		if len(mgContext.Go.MeshTestCommand) == 0 {
@@ -188,6 +176,33 @@ func (p *TeCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interface
 		environmentalVariableMap["GoScriptName"] = testName
 	}
 	// commandObject.Env = append(os.Environ(), "GoScriptName="+testName)
+
+	{
+		// print command
+		var commandString = ""
+
+		for _, part := range goTestCommand {
+			if strings.Contains(part, " ") {
+				part = "\"" + part + "\""
+			}
+
+			commandString += " " + part
+		}
+
+		commandString = strings.TrimSpace(commandString)
+
+		fmt.Printf("Command array: %v\n", domainutils.ToJson(goTestCommand))
+		fmt.Printf("Command string: %v\n", commandString)
+
+		fmt.Printf("EnvironmentalVariableMap: %v\n", domainutils.ToJson(environmentalVariableMap))
+	}
+
+	if p.dryRun {
+		fmt.Printf("Dry run, exiting...\n")
+		return subcommands.ExitSuccess
+	} else {
+		fmt.Printf("Start running...\n")
+	}
 
 	var commandObject = exec.CommandContext(ctx, goTestCommand[0], goTestCommand[1:]...)
 	commandObject.Stdout = os.Stdout
