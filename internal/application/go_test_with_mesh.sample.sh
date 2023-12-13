@@ -36,6 +36,7 @@ doas -p $ServicePsm docker run -i --rm \
    --network=host -e CONSUL_HTTP_HOST=`hostname -i` \
    -e RUNTIME_IDC_NAME=$RuntimeIdcName  -e RUNTIME_SERVICE_PORT=1234  -e RUNTIME_DEBUG_PORT=11234 \
    -e PSM=$ServicePsm -e SERVICE_CLUSTER=$ServiceCluster \
+   -e GoScriptName=$GoScriptName\
    -e `doas -p $ServicePsm env | grep SEC_TOKEN` \
    -v $(pwd):/workdir \
    $MeshLoaderImage \
