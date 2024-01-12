@@ -18,6 +18,8 @@ go test -v ./biz/utils --run ^TestAbcd$
 
 # mg: 只需指定方法名称
 mg t TestAbcd
+
+# TODO: mg t --group TestSomeServiceSomeMethod: running test in a single package
 ```
 
 ## Code Generation
@@ -29,8 +31,24 @@ mg g s biz/service/network_service
 # TODO: generate test (This feature is not implemented yet!)
 # TestSomeClass_SomeMethod_when_provide_nil_input_then_return_error
 mg g t SomeClass.SomeMethod when provide nil input then return error
-mg g t [*]SomeClass[)] SomeMethod when provide nil input then return error
+mg g t [*]SomeClass[)|.] SomeMethod when provide nil input then return error
 ```
+
+## Fill
+
+*Not Implemeted!*
+
+`mg fill --minute 10 --file a/b/c_test.go`
+
+```go
+//! test SomeMethod when some condition return some value
+//! test SomeClass.SomeMethod when some condition return some value
+//! test SomeClass.SomeMethod:
+// when cond1 return value1
+// when cond2 return some error
+// when cond3 return some shit
+```
+
 
 ## Context Management
 
