@@ -34,11 +34,11 @@ mg g t SomeClass.SomeMethod when provide nil input then return error
 mg g t [*]SomeClass[)|.] SomeMethod when provide nil input then return error
 ```
 
-## Fill
+## Magic
 
 *Not Implemeted!*
 
-`mg fill --minute 10 --file a/b/c_test.go`
+`mg magic [--file a/b/c_test.go]`
 
 ```go
 //! test SomeMethod when some condition return some value

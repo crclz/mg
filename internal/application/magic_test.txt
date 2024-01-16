@@ -1,0 +1,3 @@
+package application_test
+
+//! test CreateContextCommand.Execute return false when command is nil
