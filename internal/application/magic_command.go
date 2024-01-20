@@ -83,30 +83,8 @@ func (p *MagicCommand) ExecuteInteral(ctx context.Context, f *flag.FlagSet) erro
 	return nil
 }
 
-func (p *MagicCommand) PackageName(goFileName string) (string, error) {
-	var packageName = filepath.Dir(goFileName)
-	if packageName != "" {
-		return filepath.Base(packageName), nil
-	}
-
-	var err error
-
-	goFileName, err = filepath.Abs(goFileName)
-	if err != nil {
-		return "", xerrors.Errorf(": %w", err)
-	}
-
-	packageName = filepath.Dir(goFileName)
-
-	if packageName == "" {
-		return "", xerrors.Errorf("Empty package name detected")
-	}
-
-	return filepath.Base(packageName), nil
-}
-
 func (p *MagicCommand) ApplyMagicToFile(ctx context.Context, filename string) error {
-	packageName, err := p.PackageName(filename)
+	packageName, err := p.fileDiscoveryService.GetPackageName(filename)
 	if err != nil {
 		return xerrors.Errorf(": %w", err)
 	}

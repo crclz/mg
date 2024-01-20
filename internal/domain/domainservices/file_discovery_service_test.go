@@ -35,3 +35,20 @@ func TestFileDiscoveryService_Discover_happyCase1(t *testing.T) {
 	assert.Len(result, 1)
 	assert.True(strings.HasSuffix(result[0], "2.txt"), "result: %v", result)
 }
+
+func TestFileDiscoveryService_GetPackageName_returnFolderName(t *testing.T) {
+	// arrange
+	var assert = require.New(t)
+	var ctx = context.Background()
+	var fileDiscoveryService = domainservices.GetSingletonFileDiscoveryService()
+
+	assert.NotNil(ctx)
+	assert.NotNil(fileDiscoveryService)
+
+	// act
+	result, err := fileDiscoveryService.GetPackageName("internal/domain/domainservices/example_service_test.go")
+	assert.NoError(err)
+
+	// assert
+	assert.Equal("domainservices", result)
+}

@@ -124,3 +124,25 @@ func (p *FileDiscoveryService) Discover(
 
 	return result, nil
 }
+
+func (p *FileDiscoveryService) GetPackageName(goFileName string) (string, error) {
+	var packageName = filepath.Dir(goFileName)
+	if packageName != "" {
+		return filepath.Base(packageName), nil
+	}
+
+	var err error
+
+	goFileName, err = filepath.Abs(goFileName)
+	if err != nil {
+		return "", xerrors.Errorf(": %w", err)
+	}
+
+	packageName = filepath.Dir(goFileName)
+
+	if packageName == "" {
+		return "", xerrors.Errorf("Empty package name detected")
+	}
+
+	return filepath.Base(packageName), nil
+}
