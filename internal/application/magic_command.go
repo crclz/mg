@@ -48,6 +48,8 @@ func (p *MagicCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interf
 	var err = p.ExecuteInteral(ctx, f)
 	if err != nil {
 		fmt.Printf("Error: %+v\n", err)
+
+		fmt.Printf("\nCommand execution error: %v\n", err)
 		// fmt.Printf("Error: %v")
 		return subcommands.ExitFailure
 	}
@@ -65,12 +67,12 @@ func (p *MagicCommand) ExecuteInteral(ctx context.Context, f *flag.FlagSet) erro
 	}
 
 	if len(files) == 0 {
-		return xerrors.Errorf("zero file discovered. timeRange(sec): %v, pattern: %v", timeRange, pattern)
+		return xerrors.Errorf("zero file discovered. timeRange: %v, pattern: %v", timeRange, pattern)
 	}
 
 	if len(files) > fileLimit {
-		return xerrors.Errorf("too many file discovered. actual: %v, limit: %v, timeRange(sec): %v, pattern: %v",
-			len(files), fileLimit, timeRange/time.Second, pattern)
+		return xerrors.Errorf("too many file discovered. actual: %v, limit: %v, timeRange: %v, pattern: %v",
+			len(files), fileLimit, timeRange, pattern)
 	}
 
 	for _, filename := range files {
@@ -133,6 +135,11 @@ func (p *MagicCommand) ApplyMagicToFile(ctx context.Context, filename string) er
 func (p *MagicCommand) ApplyMagicTestClassMethod(
 	ctx context.Context, packageName string, contentLines []string,
 ) ([]string, error) {
+	mgContext, err := p.mgContextService.GetUsingMgContext(ctx, ".")
+	if err != nil {
+		return nil, xerrors.Errorf(": %w", err)
+	}
+
 	var result []string
 
 	// regex tool: https://www.jyshare.com/front-end/854/
@@ -160,13 +167,9 @@ func (p *MagicCommand) ApplyMagicTestClassMethod(
 		var templateText = `{{define "a"}}
 func Test{{.ServiceName}}_{{.MethodName}}_{{.BehaviorClause}}(t* testing.T) {
 	// arrange
-	var assert = utils.ProdAssert(t)
-	var ctx = context.Background()
-	var {{.ServiceVariableName}} = {{.PackageName}}.GetSingleton{{.ServiceName}}()
+	{{.TestArrangePart}}
+	// var {{.ServiceVariableName}} = {{.PackageName}}.GetSingleton{{.ServiceName}}()
 	
-	assert.NotNil(ctx)
-	assert.NotNil({{.ServiceVariableName}})
-
 	// act
 	// {{.ServiceVariableName}}.{{.MethodName}}()
 
@@ -188,6 +191,7 @@ func Test{{.ServiceName}}_{{.MethodName}}_{{.BehaviorClause}}(t* testing.T) {
 			"MethodName":          methodName,
 			"BehaviorClause":      behaviorClause,
 			"ServiceVariableName": serviceVariableName,
+			"TestArrangePart":     mgContext.Go.Magic.TestArrangePart,
 		})
 
 		if err != nil {

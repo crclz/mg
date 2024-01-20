@@ -2,3 +2,8 @@ Go:
   GoTestPrefix: []
   GoBuildNoOptim: true
   MeshTestCommand: ["bash", "mesh_test_dummy.sh"]
+  Magic:
+    TestArrangePart: |-
+      var assert = require.New(t)
+      var ctx = context.Background()
+      assert.NotNil(ctx)

@@ -29,4 +29,10 @@ type MgContextConfigGoConfig struct {
 	GoTestPrefix    []string `yaml:"GoTestPrefix"`
 	GoBuildNoOptim  bool     `yaml:"GoBuildNoOptim"`
 	MeshTestCommand []string `yaml:"MeshTestCommand"`
+
+	Magic MagicConfig `yaml:"Magic"`
+}
+
+type MagicConfig struct {
+	TestArrangePart string `yaml:"TestArrangePart"`
 }
