@@ -70,7 +70,7 @@ func (p *MagicCommand) ExecuteInteral(ctx context.Context, f *flag.FlagSet) erro
 
 	if len(files) > fileLimit {
 		return xerrors.Errorf("too many file discovered. actual: %v, limit: %v, timeRange(sec): %v, pattern: %v",
-			len(files), timeRange)
+			len(files), fileLimit, timeRange/time.Second, pattern)
 	}
 
 	for _, filename := range files {
@@ -86,7 +86,7 @@ func (p *MagicCommand) ExecuteInteral(ctx context.Context, f *flag.FlagSet) erro
 func (p *MagicCommand) PackageName(goFileName string) (string, error) {
 	var packageName = filepath.Dir(goFileName)
 	if packageName != "" {
-		return packageName, nil
+		return filepath.Base(packageName), nil
 	}
 
 	var err error
@@ -102,7 +102,7 @@ func (p *MagicCommand) PackageName(goFileName string) (string, error) {
 		return "", xerrors.Errorf("Empty package name detected")
 	}
 
-	return packageName, nil
+	return filepath.Base(packageName), nil
 }
 
 func (p *MagicCommand) ApplyMagicToFile(ctx context.Context, filename string) error {

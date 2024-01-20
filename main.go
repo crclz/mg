@@ -22,6 +22,10 @@ func main() {
 
 	// generate
 	subcommands.Register(application.NewGenerateCommand(domainservices.GetSingletonMgContextService()), "Code Generation")
+	subcommands.Register(application.NewMagicCommand(
+		domainservices.GetSingletonMgContextService(),
+		domainservices.GetSingletonFileDiscoveryService(),
+	), "Magic")
 
 	flag.Parse()
 	ctx := context.Background()
