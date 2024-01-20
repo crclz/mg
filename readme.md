@@ -41,12 +41,8 @@ mg g t [*]SomeClass[)|.] SomeMethod when provide nil input then return error
 `mg magic [--file a/b/c_test.go]`
 
 ```go
-//! test SomeMethod when some condition return some value
-//! test SomeClass.SomeMethod when some condition return some value
-//! test SomeClass.SomeMethod:
-// when cond1 return value1
-// when cond2 return some error
-// when cond3 return some shit
+/* test */
+//! magic test SomeService.SomeMethod return false when some condition
 ```
 
 
