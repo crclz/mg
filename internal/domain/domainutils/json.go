@@ -1,9 +1,11 @@
 package domainutils
 
-import "encoding/json"
+import (
+	"github.com/bytedance/sonic"
+)
 
 func ToJson(object any) string {
-	var bytes, err = json.Marshal(object)
+	var bytes, err = sonic.Marshal(object)
 	if err != nil {
 		panic(err)
 	}
