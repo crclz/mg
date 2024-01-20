@@ -27,11 +27,10 @@ func TestMagicCommand_ApplyMagicTestClassMethod_happyCase1(t *testing.T) {
 	result, err := magicCommand.ApplyMagicTestClassMethod(ctx, "some_package", sourceCodeLines)
 	assert.NoError(err)
 
-	assert.Contains(strings.Join(result, "\n"), "TestNetworkService_Detect_returnFalseWhenNotConnected")
+	var resultString = strings.Join(result, "\n")
+
+	assert.Contains(resultString, "TestNetworkService_Detect_returnFalseWhenNotConnected")
 
 	// assert
-	t.Logf("Result:")
-	for _, line := range result {
-		t.Log(line)
-	}
+	t.Logf("Result: \n%v\n", strings.Join(result, "\n"))
 }
