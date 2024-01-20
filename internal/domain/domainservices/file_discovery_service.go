@@ -29,7 +29,7 @@ func initSingletonFileDiscoveryService() *FileDiscoveryService {
 
 // returns absolute paths
 func (p *FileDiscoveryService) Discover(
-	ctx context.Context, rootDirectory string, pattern *regexp.Regexp, modifyTimeRange int64,
+	ctx context.Context, rootDirectory string, rglobPattern string, contentPattern *regexp.Regexp, modifyTimeRange int64,
 ) ([]string, error) {
 	panic("NotImplemented")
 }
