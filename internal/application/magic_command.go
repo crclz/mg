@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/crclz/mg/internal/domain/domainservices"
 	"github.com/google/subcommands"
@@ -55,10 +56,10 @@ func (p *MagicCommand) Execute(ctx context.Context, f *flag.FlagSet, _ ...interf
 
 func (p *MagicCommand) ExecuteInteral(ctx context.Context, f *flag.FlagSet) error {
 	var pattern = regexp.MustCompile(`//[ ]?![ ]?magic`)
-	const timeRange = 3 * 60
+	const timeRange time.Duration = time.Minute * 3
 	const fileLimit = 5
 
-	files, err := p.fileDiscoveryService.Discover(ctx, ".", "*.go", pattern, 3*60)
+	files, err := p.fileDiscoveryService.Discover(ctx, ".", "*.go", pattern, timeRange, fileLimit)
 	if err != nil {
 		return xerrors.Errorf(": %w", err)
 	}
