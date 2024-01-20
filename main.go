@@ -15,13 +15,19 @@ func main() {
 	subcommands.Register(subcommands.FlagsCommand(), "")
 	subcommands.Register(subcommands.CommandsCommand(), "")
 
-	subcommands.Register(application.NewTeCommand(domainservices.GetSingletonMgContextService()), "Testing")
+	subcommands.Register(application.NewTeCommand(domainservices.GetSingletonMgContextService()),
+		"Testing")
 
-	subcommands.Register(application.NewCreateContextCommand(domainservices.GetSingletonMgContextService()), "Context Management")
-	subcommands.Register(application.NewUseContextCommand(domainservices.GetSingletonMgContextService()), "Context Management")
+	subcommands.Register(application.NewCreateContextCommand(domainservices.GetSingletonMgContextService()),
+		"Context Management")
+
+	subcommands.Register(application.NewUseContextCommand(domainservices.GetSingletonMgContextService()),
+		"Context Management")
 
 	// generate
-	subcommands.Register(application.NewGenerateCommand(domainservices.GetSingletonMgContextService()), "Code Generation")
+	subcommands.Register(application.NewGenerateCommand(domainservices.GetSingletonMgContextService()),
+		"Code Generation")
+
 	subcommands.Register(application.NewMagicCommand(
 		domainservices.GetSingletonMgContextService(),
 		domainservices.GetSingletonFileDiscoveryService(),
