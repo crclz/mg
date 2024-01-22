@@ -1,5 +1,6 @@
 # mg cli tool ignore
 /mg-temp
+/mg
 *.tmp.*
 
 # mg develop
