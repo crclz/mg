@@ -4,7 +4,7 @@
 
 mg是一个轻量级的、简单的命令行工具，它能够改善我们使用golang开发时的体验。它包含了以下功能：
 
-- 测试运行：当必须使用命令行而非IDE运行测试时（因为鉴权等原因），只需复制测试用例名称，无需传入package路径，就可运行测试。
+- 测试运行：由于鉴权，当必须使用命令行而非IDE运行测试时，只需复制测试用例名称，无需传入package路径，就可运行测试。
 - 代码生成：
   - 简单依赖注入模式下的服务类代码生成
   - 简单依赖注入模式下的测试代码生成
@@ -46,31 +46,6 @@ go test -v ./biz/utils --run ^TestAbcd$
 mg t TestAbcd
 ```
 
-## 代码生成
-
-在了解代码生成前，先了解依赖注入：[dependency-injection](./docs/dependency-injection.md)
-
-```bash
-# generate a simple singleton service in biz/service/network_service.go
-mg g s biz/service/network_service
-
-# TODO: generate test (This feature is not implemented yet!)
-# TestSomeClass_SomeMethod_when_provide_nil_input_then_return_error
-mg g t SomeClass.SomeMethod when provide nil input then return error
-mg g t [*]SomeClass[)|.] SomeMethod when provide nil input then return error
-```
-
-## Magic
-
-*Not Implemeted!*
-
-`mg magic [--file a/b/c_test.go]`
-
-```go
-/* test */
-//! magic test SomeService.SomeMethod return false when some condition
-```
-
 
 ## Context Management
 
@@ -96,7 +71,70 @@ Go:
     GoBuildNoOptim: true # 禁止编译优化，在测试中使用mockey时常常需要打开此开关
 ```
 
-## Running Tests with Mesh
+## 代码生成
+
+### 服务生成（简单依赖注入风格的）
+
+在了解代码生成前，先了解依赖注入：[dependency-injection](./docs/dependency-injection.md)
+
+生成一个[简单依赖注入风格](./docs/dependency-injection.md#简单依赖注入)的service类，运行命令：
+
+`mg g s biz/service/network_service`
+
+
+### 测试生成（简单依赖注入风格的）
+
+1. 新建或者打开已有的测试文档。输入：
+
+```go
+//!magic test SomeService.SomeMethod return false when command is nil 
+```
+
+其中，`//!magic test`是固定语法。`SomeService.SomeMethod`分别代表类名和方法名。`return false when command is nil`是behavior，会被转换为测试函数名称的一部分。
+
+为了方便直接从代码进行复制，这种语法也是支持的：`SomeService) SomeMethod`
+
+2. 命令行执行 `mg magic`，就会生成这种代码：
+
+```go
+func TestSomeService_SomeMethod_returnFalseWhenCommandIsNil(t *testing.T) {
+	// arrange
+	var assert = require.New(t)
+	var ctx = context.Background()
+	assert.NotNil(ctx)
+	// var someService = mg.GetSingletonSomeService()
+
+	// act
+	// someService.SomeMethod()
+
+	// assert
+}
+```
+
+3. 可以在mg-context配置文件中修改arrange的部分代码(TestArrangePart)：
+```yaml
+Go:
+  ...
+  Magic:
+    TestArrangePart: |-
+      var assert = require.New(t)
+      var ctx = context.Background()
+      assert.NotNil(ctx)
+```
+
+
+
+
+## 测试（进阶用法）
+
+### 其他参数
+
+options:
+- `--c1`: add --count=1 to argument
+- `--dry-run`: only print command, not run test
+- `--script $GoScriptName`: add GoScriptName as environment variable, see mgtesting/
+
+### Running Tests with Mesh
 
 有时下游会开启~~严格鉴权~~服务鉴定，此时开发调试时需要套一层mesh。
 
@@ -106,9 +144,3 @@ Go:
 2. 修改 mg-context.*.yaml, 在 `Go` 字段下，添加 `MeshTestCommand: ["bash", "go_test_with_mesh.sh"]`
 3. 运行测试时添加 `--mesh` 参数，例如: `mg t --mesh TestXXXX`
 
-## Running Tests (Advanced)
-
-options:
-- `--c1`: add --count=1 to argument
-- `--dry-run`: only print command, not run test
-- `--script $GoScriptName`: add GoScriptName as environment variable, see mgtesting/

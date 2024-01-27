@@ -303,4 +303,5 @@ func initSingletonBetaService() *BetaService {
 
 ## golang依赖注入框架
 
-## RequestScope 的依赖
+- wire: https://github.com/google/wire
+- examples: https://github.com/crclz/go-ioc-example
