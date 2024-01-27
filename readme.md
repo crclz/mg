@@ -1,28 +1,54 @@
-# CLI Tool
+# mg: golang development at the speed of thought
 
-## Installation
+## 简介
+
+mg是一个轻量级的、简单的命令行工具，它能够改善我们使用golang开发时的体验。它包含了以下功能：
+
+- 测试运行：当必须使用命令行而非IDE运行测试时（因为鉴权等原因），只需复制测试用例名称，无需传入package路径，就可运行测试。
+- 代码生成：
+  - 简单依赖注入模式下的服务类代码生成
+  - 简单依赖注入模式下的测试代码生成
+
+详细的功能介绍，请看后文对应的章节。
+
+## 安装
+
+![GitHub Tag](https://img.shields.io/github/v/tag/crclz/mg?sort=semver)
 
 ```bash
 go install github.com/crclz/mg@latest
 
 # or:
-
 # 注意字节内部的goproxy在代理github时不会很及时（天级延迟），所以需要临时采用其他的goproxy.
 GOPROXY=https://goproxy.cn go install github.com/crclz/mg@latest
+
+# or:
+# 任何代理的 @latest 都会有一定时间的延迟，请将上方图片中的 tag 的后面的版本号作为最新版本，即可解决问题。
+go install github.com/crclz/mg@v9.9.9 # 请替换 v9.9.9 为有效的版本号
+
 ```
 
-## Running Tests (Basic)
+## 运行测试
+
+在本地开发的场景下，IDE可方便地运行绝大部分的测试；但是如果在生产网进行开发和测试，那么就会使用到鉴权命令行工具，例如`doas`或者 docker mesh 镜像。这些工具可能无法与IDE兼容，开发者运行测试的方式也变为命令行。
+
+在命令行运行测试的最常用的方法，是这样：
+
 ```bash
 # 自己敲命令: 需指定包名称
 go test -v ./biz/utils --run ^TestAbcd$
-
-# mg: 只需指定方法名称
-mg t TestAbcd
-
-# TODO: mg t --group TestSomeServiceSomeMethod: running test in a single package
 ```
 
-## Code Generation
+通过 mg 可以这样运行：
+
+```bash
+# mg: 只需指定方法名称
+mg t TestAbcd
+```
+
+## 代码生成
+
+在了解代码生成前，先了解依赖注入：[dependency-injection](./docs/dependency-injection.md)
 
 ```bash
 # generate a simple singleton service in biz/service/network_service.go
