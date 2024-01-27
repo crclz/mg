@@ -241,6 +241,63 @@ func main() {
 
 ## 简单依赖注入
 
+“简单依赖注入”并非一个已有的专有名词。它指的是这样的风格：
+
+service/alpha_service.go
+```go
+type AlphaService struct {
+}
+
+// Constructor of AlphaService
+func NewAlphaService() *AlphaService {
+	return &AlphaService{}
+}
+
+// wire
+
+var singletonAlphaService *AlphaService = initSingletonAlphaService()
+
+func GetSingletonAlphaService() *AlphaService {
+	return singletonAlphaService
+}
+
+func initSingletonAlphaService() *AlphaService {
+	return NewAlphaService()
+}
+```
+
+service/beta_service.go
+```go
+type BetaService struct {
+	alphaService *AlphaService
+}
+
+// Constructor of BetaService
+func NewBetaService(
+	alphaService *AlphaService,
+) *BetaService {
+	return &BetaService{alphaService: alphaService}
+}
+
+// wire
+
+var singletonBetaService *BetaService = initSingletonBetaService()
+
+func GetSingletonBetaService() *BetaService {
+	return singletonBetaService
+}
+
+func initSingletonBetaService() *BetaService {
+	return NewBetaService(GetSingletonAlphaService())
+}
+```
+
+“简单依赖注入”将Service对象的创建放到了服务定义的同一package、同一文件中，稍微有些违背上文说的只有application层才关心如何创建 Service对象。但同时，简单依赖注入具备一些优点：
+
+- 与标准的做法相比，在代码仓库不被其他仓库引用时，不会存在不便
+- 学习成本低，容易模仿
+
+“简单依赖注入”其实算是一种折中。与标准做法相比，它更简单，且不采用任何框架。与完全不使用依赖注入相比，简单依赖注入的改造成本低，并且带来的收益高。
 
 
 ## golang依赖注入框架
