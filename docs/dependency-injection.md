@@ -111,13 +111,12 @@ public class MovieRecommender {
 ```
 
 以上代码可以和C#的 `builder.Services.AddSingleton<MovieRecommender>()` 对应。
-- `Add`: `@Component`
-- `Singleton`: `@Scope("singleton")`
+- `AddSingleton`: `@Component` `@Scope("singleton")`
 - `<MovieRecommender>`:  `@Autowired public MovieRecommender(...`
 
-可以看出，东西能够对应上。但是，spring将应用层的东西（@Component, @Scope）放到了领域服务中，会存在一定的风险。
+可以看出，东西能够对应上。但是，spring将应用层的东西（@Component, @Scope）放到了领域服务中，这不是标准的、规范的做法，会存在一定的风险。
 
-另外，如果想要不依赖于构造函数，实现类似 `builder.Services.AddSingleton<INetworkService, StableNetworkService>(() => sdk.DefaultStableNetworkService)` 的功能，可以使用如下的代码：
+另外，如果想要实现类似 `builder.Services.AddSingleton<INetworkService, StableNetworkService>(() => sdk.DefaultStableNetworkService)` 的功能，可以使用如下的代码：
 
 ```java
 @Configuration
@@ -139,11 +138,13 @@ public class Config {
 
 在 java 和 C# 中，Spring 框架和 Asp.Net Core 框架，它们都有依赖注入的功能。在golang中，我们也有依赖注入的框架，例如wire、dig。
 
-当我们想要创建一个 Sevice对象 时，这些框架会找到工厂方法（Factory Method），然后看工厂方法的依赖的 Service对象 是否满足，如果未满足，就会尝试创建这些 Service对象。Service的依赖关系构成了一张有向无环图，而框架会帮我们维护这张图，并在我们需要 Service对象 时，通过这张图为我们创建对象。
+当我们想要创建一个 Sevice对象时，这些框架会找到工厂方法（Factory Method），然后看工厂方法的依赖的 Service对象是否满足，如果未满足，就会尝试创建这些 Service对象。Service的依赖关系构成了一张有向无环图，而框架会帮我们维护这张图，并在我们需要 Service对象时，通过这张图为我们创建对象。
 
 那么，假如没有依赖注入框架，就做不了依赖注入吗？答案是否定的。
 
 我们假设有这样2个存在依赖关系的 Service: AlphaService, BetaService.
+
+首先，我们模仿C#和java的形式，遵循 Explicit Dependencies Principle，依赖的关系都写在构造函数里面。在golang里面并没有构造函数这个东西，但是我们常常将 `New` + Service 名称的形式作为约定俗成的构造函数。
 
 services/alpha_beta.go
 ```go
@@ -164,7 +165,7 @@ func NewBetaService(alphaService *AlphaService) *BetaService {
 }
 ```
 
-首先，我们模仿C#和java的形式，遵循 Explicit Dependencies Principle，依赖的关系都写在构造函数里面。在golang里面并没有构造函数这个东西，但是我们常常将 `New` + Service 名称的形式作为约定俗成的构造函数。
+
 
 注意，我们需要将几乎所有Service性质的全局变量，都通过构造函数进行中转，来满足 Explicit Dependencies Principle。在少数情况下，某些非常基础的Service（例如日志）可以不被考虑外，其他Service都强烈建议采用依赖注入的模式。
 
@@ -202,7 +203,7 @@ func main() {
 单元测试使用：
 
 ```go
-func TestAbc(t* testing.T) {
+func TestAbc(t *testing.T) {
     var betaService = application.DependencyMap["betaService"].(services.BetaService)
 
     betaService.SomeMethod()
