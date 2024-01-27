@@ -136,3 +136,113 @@ public class Config {
 
 
 ## golang的依赖注入思路
+
+在 java 和 C# 中，Spring 框架和 Asp.Net Core 框架，它们都有依赖注入的功能。在golang中，我们也有依赖注入的框架，例如wire、dig。
+
+当我们想要创建一个 Sevice对象 时，这些框架会找到工厂方法（Factory Method），然后看工厂方法的依赖的 Service对象 是否满足，如果未满足，就会尝试创建这些 Service对象。Service的依赖关系构成了一张有向无环图，而框架会帮我们维护这张图，并在我们需要 Service对象 时，通过这张图为我们创建对象。
+
+那么，假如没有依赖注入框架，就做不了依赖注入吗？答案是否定的。
+
+我们假设有这样2个存在依赖关系的 Service: AlphaService, BetaService.
+
+services/alpha_beta.go
+```go
+type AlphaService struct {
+}
+
+func NewAlphaService() *AlphaService {
+    return &AlphaService{}
+}
+
+
+type BetaService struct {
+    alphaService *AlphaService
+}
+
+func NewBetaService(alphaService *AlphaService) *BetaService {
+    return &BetaService{alphaService: alphaService}
+}
+```
+
+首先，我们模仿C#和java的形式，遵循 Explicit Dependencies Principle，依赖的关系都写在构造函数里面。在golang里面并没有构造函数这个东西，但是我们常常将 `New` + Service 名称的形式作为约定俗成的构造函数。
+
+注意，我们需要将几乎所有Service性质的全局变量，都通过构造函数进行中转，来满足 Explicit Dependencies Principle。在少数情况下，某些非常基础的Service（例如日志）可以不被考虑外，其他Service都强烈建议采用依赖注入的模式。
+
+做到了这一步，golang的依赖注入就成功了一半。接下来，我们需要考虑如何手动管理 Service 对象的创建。Service 对象的创建不是领域服务需要关心的事情，而是应用层需要关系的事情。所以我们将这部分代码放到 `application/graph.go` 里面：
+
+```go
+func getDependencies() map[string]any {
+    var alphaService = services.NewAlphaService()
+    var betaService = services.NewBetaService(alphaService)
+
+    return &map[string]any{
+        "alphaService": alphaService,
+        "betaService": betaService,
+    }
+}
+
+var DependencyMap = getDependencies()
+```
+
+使用：
+
+main.go
+
+```go
+func main() {
+    var betaService = application.DependencyMap["betaService"].(services.BetaService)
+
+    // var app = ...
+    app.router.Register(betaService)
+
+    app.run()
+}
+```
+
+单元测试使用：
+
+```go
+func TestAbc(t* testing.T) {
+    var betaService = application.DependencyMap["betaService"].(services.BetaService)
+
+    betaService.SomeMethod()
+}
+```
+
+当然，使用一个map来储存依赖，可能会不太方便，所以我们可以直接使用全局变量：
+
+application/graph.go
+
+```go
+var alphaService = services.NewAlphaService()
+var betaService = services.NewBetaService(alphaService)
+
+// 在main包和测试包访问，不能访问私有变量，所以通过公共方法提供访问
+
+func GetSingletonAlphaService() *AlphaService {return alphaService}
+func GetSingletonBetaService() *BetaService {return betaService}
+```
+
+main.go
+
+```go
+func main() {
+    var betaService = application.GetSingletonAlphaService()
+
+    // var app = ...
+    app.router.Register(betaService)
+
+    app.run()
+}
+```
+
+这样就变得更简洁了。
+
+
+## 简单依赖注入
+
+
+
+## golang依赖注入框架
+
+## RequestScope 的依赖
